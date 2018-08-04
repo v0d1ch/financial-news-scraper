@@ -41,6 +41,8 @@ library
                      , generic-deriving
                      , monad-logger
                      , unliftio-core
+                     , unordered-containers
+                     , yaml
 
   ghc-options: -Wall -fwarn-tabs -fwarn-unused-imports -O0
   default-language:    Haskell2010
@@ -74,6 +76,8 @@ executable financial-news-scraper
                      , generic-deriving
                      , monad-logger
                      , unliftio-core
+                     , unordered-containers
+                     , yaml
 
   default-language: Haskell2010
 

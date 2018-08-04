@@ -11,21 +11,19 @@
 {-# LANGUAGE ConstraintKinds            #-}
 {-# LANGUAGE FlexibleContexts           #-}
 {-# LANGUAGE DeriveGeneric              #-}
+{-# LANGUAGE ScopedTypeVariables        #-}
 {-# OPTIONS_GHC -fshow-hole-constraints #-}
 
 module DB.Model where
 
-import Control.Monad (void)
-import Control.Monad.IO.Class
-import Control.Monad.Logger (runStderrLoggingT)
+import Control.Monad.Trans.Reader (ReaderT)
 import Data.Aeson
-import qualified Data.ByteString.Char8 as BS
-import Data.Text
+import Data.Either
+import Data.Text (Text)
 import Data.Time
+import Data.Yaml
 import qualified Database.Persist as P
 import Database.Persist.Postgresql
-       (ConnectionString, runSqlPersistM, withPostgresqlConn, SqlPersistT)
-import Database.Persist.Sql
 import qualified Database.Persist.TH as PTH
 import System.Environment (getEnv)
 
@@ -60,9 +58,27 @@ connStr = do
 migrateDB :: IO ()
 migrateDB = runDb (runMigration migrateAll)
 
-runDb  query = do
-  cs <- BS.pack <$> connStr
-  runStderrLoggingT $
-    withPostgresqlConn cs $ \conn ->
-      void $ liftIO $ flip runSqlPersistM conn $ query
+runDb :: ReaderT SqlBackend IO b -> IO b
+runDb query = do
+  pool <- createPool
+  runSqlPool query pool
 
+createPool :: IO ConnectionPool
+createPool = do
+  dbconf <- loadDbConf
+  createPoolConfig dbconf
+
+createPoolSimple :: IO ConnectionPool
+createPoolSimple = do
+  let cfg =
+        PostgresConf
+        { pgConnStr = "host=localhost port=5432 dbname=ii connect_timeout=10"
+        , pgPoolSize = 10
+        }
+  createPoolConfig cfg
+
+loadDbConf :: IO PostgresConf
+loadDbConf = do
+  yaml <- decodeFileEither "config/postgresql.yaml"
+  dbconf <- parseMonad loadConfig (fromRight "" yaml)
+  applyEnv (dbconf :: PostgresConf)
