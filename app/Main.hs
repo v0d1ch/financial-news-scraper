@@ -1,10 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Main where
 
+import Control.Monad (when, void)
 import qualified Text.HTML.Fscraper as F
 import qualified Text.HTML.Freader as R
 import DB.Model
-import Data.Time.Clock (diffUTCTime)
 import Data.Time
 import Database.Persist
 import Control.Monad.IO.Class (MonadIO, liftIO)
@@ -16,6 +16,7 @@ main = insertStoriesReuters
 insertStoriesReuters :: IO ()
 insertStoriesReuters = do
   now <- liftIO getCurrentTime
+  let today = utctDay now
   topnews <- getTopStory
   fnews <- getFeatureStories
   snews <- getSideStories
@@ -27,16 +28,12 @@ insertStoriesReuters = do
       allS = topstories <> fstories <> sstories <> rssstories
   firststory <- runDb $ selectFirst [] [Desc StoryCreated]
   case firststory of
-    Nothing -> do
-      _ <- mapM checkStorySaved allS
-      return ()
+    Nothing -> void $ mapM checkStorySaved allS
     Just fs -> do
-      let tdiff = diffUTCTime now (storyCreated $ entityVal fs)
-      if (tdiff > 7200)
-        then do
-          _ <- mapM checkStorySaved allS
-          return ()
-        else return ()
+      let tdiff = diffDays today (utctDay (storyCreated $ entityVal fs))
+      _ <- liftIO $ print tdiff
+      when (tdiff > 0) $
+        void $ mapM checkStorySaved allS
       return ()
 
 
