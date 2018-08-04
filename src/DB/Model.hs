@@ -18,6 +18,7 @@ module DB.Model where
 
 import Control.Monad.Trans.Reader (ReaderT)
 import Data.Aeson
+import Data.Hashable
 import Data.Either
 import Data.Text (Text)
 import Data.Time
@@ -82,3 +83,8 @@ loadDbConf = do
   yaml <- decodeFileEither "config/postgresql.yaml"
   dbconf <- parseMonad loadConfig (fromRight "" yaml)
   applyEnv (dbconf :: PostgresConf)
+
+makeHash
+  :: Hashable a
+  => a -> Int
+makeHash = hash
