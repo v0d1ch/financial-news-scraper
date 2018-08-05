@@ -22,6 +22,7 @@ import Data.Hashable
 import Data.Either
 import Data.Text (Text)
 import Data.Time
+import Data.ByteString.Char8 as BS
 import Data.Yaml
 import qualified Database.Persist as P
 import Database.Persist.Postgresql
@@ -47,14 +48,14 @@ instance ToJSON (P.Entity Story) where
         , "image"   .= storyImage p
         ]
 
-connStr :: IO String
+connStr :: IO ByteString
 connStr = do
-  host <- getEnv "DATABASE_HOST"
-  port <- getEnv "DATABASE_PORT"
-  user <- getEnv "DATABASE_USER"
-  password <- getEnv "DATABASE_PASSWORD"
-  name <- getEnv "DATABASE_NAME"
-  return $ mconcat ["host=", host, " port=", port, " dbname=", name , " user=", user, " password=", password]
+  host <- getEnv "DB_HOST"
+  port <- getEnv "DB_PORT"
+  user <- getEnv "DB_USER"
+  password <- getEnv "DB_PASSWORD"
+  name <- getEnv "DB_DATABASE"
+  return $ BS.pack $ mconcat ["host=", host, " port=", port, " dbname=", name , " user=", user, " password=", password]
 
 migrateDB :: IO ()
 migrateDB = runDb (runMigration migrateAll)
@@ -67,15 +68,13 @@ runDb query = do
 createPool :: IO ConnectionPool
 createPool = do
   dbconf <- loadDbConf
-  createPoolConfig dbconf
+  -- createPoolConfig dbconf
+  createPoolSimple
 
 createPoolSimple :: IO ConnectionPool
 createPoolSimple = do
-  let cfg =
-        PostgresConf
-        { pgConnStr = "host=localhost port=5432 dbname=ii connect_timeout=10"
-        , pgPoolSize = 10
-        }
+  cstr <- connStr
+  let cfg = PostgresConf {pgConnStr = cstr, pgPoolSize = 10}
   createPoolConfig cfg
 
 loadDbConf :: IO PostgresConf
