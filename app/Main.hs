@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Main where
 
-import Control.Monad (when, void)
+import Control.Monad (void)
 import qualified Text.HTML.Fscraper as F
 import qualified Text.HTML.Freader as R
 import DB.Model
@@ -16,7 +16,6 @@ main = insertStoriesReuters
 insertStoriesReuters :: IO ()
 insertStoriesReuters = do
   now <- liftIO getCurrentTime
-  let today = utctDay now
   topnews <- getTopStory
   fnews <- getFeatureStories
   snews <- getSideStories
@@ -26,15 +25,7 @@ insertStoriesReuters = do
       sstories = mapM convertStory snews now
       rssstories = mapM convertRssFeed rssnews now
       allS = topstories <> fstories <> sstories <> rssstories
-  firststory <- runDb $ selectFirst [] [Desc StoryCreated]
-  case firststory of
-    Nothing -> void $ mapM checkStorySaved allS
-    Just fs -> do
-      let tdiff = diffDays today (utctDay (storyCreated $ entityVal fs))
-      _ <- liftIO $ print tdiff
-      when (tdiff > 0) $
-        void $ mapM checkStorySaved allS
-      return ()
+  void $ mapM checkStorySaved allS
 
 
 checkStorySaved :: Story -> IO (Maybe (Entity Story))

@@ -1,0 +1,1 @@
+web: financial-news-scraper
