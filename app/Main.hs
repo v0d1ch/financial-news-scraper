@@ -17,7 +17,7 @@ import qualified Text.HTML.Fscraper as F
 
 main :: IO ()
 main = do
-  let port = 3000
+  let port = 5000
   putStrLn $ "Listening on port " ++ show port
   void $ insertStoriesReuters
   run port app
