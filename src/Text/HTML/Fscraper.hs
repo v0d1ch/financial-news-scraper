@@ -12,7 +12,6 @@ module Text.HTML.Fscraper
     ) where
 
 import Text.HTML.Scalpel (Scraper, tagSelector, (@:), (//), chroots, attr, scrapeURL, hasClass, text)
-
 import Text.Regex.PCRE
 import Data.Text
 

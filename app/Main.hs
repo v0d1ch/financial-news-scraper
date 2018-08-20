@@ -2,16 +2,29 @@
 module Main where
 
 import Control.Monad (void)
-import qualified Text.HTML.Fscraper as F
-import qualified Text.HTML.Freader as R
-import DB.Model
-import Data.Time
-import Database.Persist
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Data.Text
+import Data.Time
+import Database.Persist
+import DB.Model
+import Network.HTTP.Types (status200)
+import Network.HTTP.Types.Header (hContentType)
+import Network.Wai (Application, Request, Response, pathInfo, requestMethod, responseLBS,
+                    strictRequestBody)
+import Network.Wai.Handler.Warp (run)
+import qualified Text.HTML.Freader as R
+import qualified Text.HTML.Fscraper as F
 
 main :: IO ()
-main = insertStoriesReuters
+main = do
+  let port = 3000
+  putStrLn $ "Listening on port " ++ show port
+  void $ insertStoriesReuters
+  run port app
+
+app :: Application
+app req f =
+  f $ responseLBS status200 [(hContentType, "text/plain")] "Hello world!"
 
 insertStoriesReuters :: IO ()
 insertStoriesReuters = do
