@@ -15,6 +15,8 @@ import Network.Wai.Handler.Warp (run)
 import qualified Text.HTML.Freader as R
 import qualified Text.HTML.Fscraper as F
 
+import Data.Semigroup
+
 main :: IO ()
 main = do
   let port = 5000

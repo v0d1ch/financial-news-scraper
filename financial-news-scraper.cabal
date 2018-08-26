@@ -46,6 +46,7 @@ library
                      , hashable
                      , wai
                      , warp
+                     , http-types
 
   ghc-options: -Wall -fwarn-tabs -fwarn-unused-imports -O0
   default-language:    Haskell2010
@@ -88,6 +89,7 @@ executable financial-news-scraper
                      , hashable
                      , wai
                      , warp
+                     , http-types
 
   default-language: Haskell2010
 
