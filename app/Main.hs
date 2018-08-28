@@ -15,10 +15,26 @@ import Network.Wai.Handler.Warp (run)
 import qualified Text.HTML.Freader as R
 import qualified Text.HTML.Fscraper as F
 
+import Control.Monad
+import Control.Monad.Logger (LoggingT, runStderrLoggingT)
+import Database.Persist.Sql (ConnectionPool, SqlBackend, runSqlPool, runMigration)
+import Control.Monad.Trans.Resource (ResourceT, runResourceT)
+import Control.Monad.Trans.Reader (ReaderT)
+import Data.Pool (Pool(..))
+
+import Data.Semigroup
+
+dbFunction :: ReaderT SqlBackend (LoggingT (ResourceT IO)) a -> Pool SqlBackend  -> IO a
+dbFunction query pool = runResourceT $ runStderrLoggingT $ runSqlPool query pool
+
 main :: IO ()
 main = do
   let port = 5000
   putStrLn $ "Listening on port " ++ show port
+  
+  pool <- createPoolSimple
+  dbFunction (runMigration migrateAll) pool
+  
   void $ insertStoriesReuters
   run port app
 
