@@ -1,4 +1,6 @@
 .stack-work/
+dist/
+dist-newstyle/
 .git/
 
 client_session_key.aes
