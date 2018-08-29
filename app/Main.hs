@@ -1,46 +1,31 @@
 {-# LANGUAGE OverloadedStrings #-}
+
 module Main where
 
 import Control.Monad (void)
 import Control.Monad.IO.Class (MonadIO, liftIO)
+import Data.Semigroup
 import Data.Text
 import Data.Time
 import Database.Persist
 import DB.Model
 import Network.HTTP.Types (status200)
 import Network.HTTP.Types.Header (hContentType)
-import Network.Wai (Application, Request, Response, pathInfo, requestMethod, responseLBS,
-                    strictRequestBody)
+import Network.Wai (Application, responseLBS)
 import Network.Wai.Handler.Warp (run)
 import qualified Text.HTML.Freader as R
 import qualified Text.HTML.Fscraper as F
 
-import Control.Monad
-import Control.Monad.Logger (LoggingT, runStderrLoggingT)
-import Database.Persist.Sql (ConnectionPool, SqlBackend, runSqlPool, runMigration)
-import Control.Monad.Trans.Resource (ResourceT, runResourceT)
-import Control.Monad.Trans.Reader (ReaderT)
-import Data.Pool (Pool(..))
-
-import Data.Semigroup
-
-dbFunction :: ReaderT SqlBackend (LoggingT (ResourceT IO)) a -> Pool SqlBackend  -> IO a
-dbFunction query pool = runResourceT $ runStderrLoggingT $ runSqlPool query pool
-
 main :: IO ()
 main = do
-  let port = 5000
-  putStrLn $ "Listening on port " ++ show port
-  
-  pool <- createPoolSimple
-  dbFunction (runMigration migrateAll) pool
-  
+  putStrLn $ "Starting engine... "
   void $ insertStoriesReuters
-  run port app
+  run 5000 app
 
 app :: Application
-app req f =
-  f $ responseLBS status200 [(hContentType, "text/plain")] "Hello world!"
+app _ f = do
+  putStrLn $ "Fire rockets!"
+  f $ responseLBS status200 [(hContentType, "text/plain")] "Financial news scraper."
 
 insertStoriesReuters :: IO ()
 insertStoriesReuters = do
