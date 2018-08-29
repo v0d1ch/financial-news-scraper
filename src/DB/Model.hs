@@ -48,7 +48,7 @@ instance ToJSON (P.Entity Story) where
         , "image"   .= storyImage p
         ]
 
-connStr :: IO ByteString
+connStr :: IO ConnectionString
 connStr = do
   host <- getEnv "DB_HOST"
   port <- getEnv "DB_PORT"
@@ -67,7 +67,7 @@ runDb query = do
 
 createPool :: IO ConnectionPool
 createPool = do
-  dbconf <- loadDbConf
+  -- dbconf <- loadDbConf
   -- createPoolConfig dbconf
   createPoolSimple
 
