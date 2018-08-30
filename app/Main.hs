@@ -13,14 +13,16 @@ import Network.HTTP.Types (status200)
 import Network.HTTP.Types.Header (hContentType)
 import Network.Wai (Application, responseLBS)
 import Network.Wai.Handler.Warp (run)
+import System.Environment (getEnv)
 import qualified Text.HTML.Freader as R
 import qualified Text.HTML.Fscraper as F
 
 main :: IO ()
 main = do
+  port <- getEnv "PORT"
   putStrLn $ "Starting engine... "
   void $ insertStoriesReuters
-  run 5000 app
+  run (read port) app
 
 app :: Application
 app _ f = do
