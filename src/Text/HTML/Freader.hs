@@ -1,5 +1,4 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards   #-}
 
 module Text.HTML.Freader
   ( parseXml
@@ -22,7 +21,7 @@ data RssFeed = RssFeed
   , rssUrl   :: Text
   } deriving (Show)
 
-data RssException =
+newtype RssException =
   RssException String
   deriving (Show)
 
@@ -37,10 +36,10 @@ parseRss bs = res
         Right d                -> return d
 
 getFeed :: Text -> RssM Document
-getFeed rssUrl = do
+getFeed url = do
   manager <- lift $ newManager $ managerSetProxy noProxy tlsManagerSettings
   lift $ setGlobalManager manager
-  rssRequest <- parseRequest $ unpack rssUrl
+  rssRequest <- parseRequest $ unpack url
   crumb <-
     lift $ try (httpLbs rssRequest manager) :: RssM (Either RssException (Response ByteString))
   case fmap responseBody crumb of

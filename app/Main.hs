@@ -4,7 +4,6 @@ module Main where
 
 import Control.Monad (void)
 import Control.Monad.IO.Class (MonadIO, liftIO)
-import Data.Semigroup
 import Data.Text
 import Data.Time
 import Database.Persist
@@ -20,13 +19,13 @@ import qualified Text.HTML.Fscraper as F
 main :: IO ()
 main = do
   port <- getEnv "PORT"
-  putStrLn $ "Starting engine... "
-  void $ insertStoriesReuters
+  putStrLn "Starting engine... "
+  void insertStoriesReuters
   run (read port) app
 
 app :: Application
 app _ f = do
-  putStrLn $ "Fire rockets!"
+  putStrLn "Fire rockets!"
   f $ responseLBS status200 [(hContentType, "text/plain")] "Financial news scraper."
 
 insertStoriesReuters :: IO ()
@@ -41,7 +40,7 @@ insertStoriesReuters = do
       sstories = mapM convertStory snews now
       rssstories = mapM convertRssFeed rssnews now
       allS = topstories <> fstories <> sstories <> rssstories
-  void $ mapM checkStorySaved allS
+  mapM_ checkStorySaved allS
 
 
 checkStorySaved :: Story -> IO (Maybe (Entity Story))

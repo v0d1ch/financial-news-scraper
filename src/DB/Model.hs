@@ -66,7 +66,7 @@ runDb query = do
   runSqlPool query pool
 
 createPool :: IO ConnectionPool
-createPool = do
+createPool =
   -- dbconf <- loadDbConf
   -- createPoolConfig dbconf
   createPoolSimple

@@ -57,26 +57,26 @@ leftColumnNews :: String -> String -> IO (Maybe [News])
 leftColumnNews classname url = scrapeURL url newslist
   where
     newslist :: Scraper String [News]
-    newslist = chroots ("div" @: [hasClass classname] // (tagSelector "li")) sideColumnTextNews
+    newslist = chroots ("div" @: [hasClass classname] // tagSelector "li") sideColumnTextNews
 
 topStoryImageNews :: Scraper String News
 topStoryImageNews = do
-  title <- text $ "h2"
-  link <- attr "href" $ "a"
-  imageURL <- attr "src" $ "img"
-  ntext <- text $ "p"
+  title <- text "h2"
+  link <- attr "href" "a"
+  imageURL <- attr "src" "img"
+  ntext <- text "p"
   return $ ImageNews imageURL title link ntext
 
 sideColumnTextNews :: Scraper String News
 sideColumnTextNews = do
-  title <- text $ "a"
-  link <- attr "href" $ "a"
+  title <- text "a"
+  link <- attr "href" "a"
   ntext <- text $ "span" @: [hasClass "timestamp"]
   return $ TextNews title link ntext
 
 featureStoryImageNews :: Scraper String News
 featureStoryImageNews = do
   title <- text $ "h2" @: [hasClass "story-title"]
-  link <- attr "href" $ "a"
-  imageURL <- attr "org-src" $ "img"
+  link <- attr "href" "a"
+  imageURL <- attr "org-src" "img"
   return $ ImageNews imageURL title link ""
